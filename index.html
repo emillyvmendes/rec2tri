@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini AI Chat</title>
+
+  <!-- Biblioteca Marked.js para interpretar Markdown (negrito, listas, blocos de código) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #121214;
+      color: #e1e1e6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .chat-card {
+      width: 100%;
+      max-width: 720px;
+      height: 90vh;
+      background-color: #202024;
+      border: 1px solid #323238;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Topo com botão de limpar */
+    .chat-header {
+      padding: 16px 20px;
+      background-color: #18181b;
+      border-bottom: 1px solid #323238;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #04d361;
+    }
+
+    .btn-reset {
+      background-color: #e53e3e;
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background-color: #c53030;
+    }
+
+    /* Área onde as mensagens aparecem */
+    #historico {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .mensagem {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      word-wrap: break-word;
+    }
+
+    /* Estilo da mensagem do Usuário */
+    .usuario {
+      background-color: #00875f;
+      color: #ffffff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+      white-space: pre-wrap;
+    }
+
+    /* Estilo da mensagem da IA (Bot) */
+    .bot {
+      background-color: #29292e;
+      color: #e1e1e6;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid #323238;
+    }
+
+    /* Formatações de Markdown no Bot */
+    .bot p {
+      margin-bottom: 8px;
+    }
+
+    .bot p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bot pre {
+      background-color: #121214;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 10px 0;
+      border: 1px solid #323238;
+    }
+
+    .bot code {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #121214;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .bot ul, .bot ol {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+
+    /* Barra inferior de input */
+    .chat-footer {
+      padding: 16px;
+      background-color: #18181b;
+      border-top: 1px solid #323238;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-footer input {
+      flex: 1;
+      background-color: #121214;
+      border: 1px solid #323238;
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .chat-footer input:focus {
+      border-color: #04d361;
+    }
+
+    .chat-footer button {
+      background-color: #04d361;
+      color: #000;
+      border: none;
+      padding: 0 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .chat-footer button:hover {
+      opacity: 0.85;
+    }
+
+    .chat-footer button:disabled {
+      background-color: #7c7c8a;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-card">
+    <div class="chat-header">
+      <h1>Gemini IA Chat</h1>
+      <!-- Botão Reset da Fase 2 e 3 -->
+      <button class="btn-reset" id="btnLimpar">🗑️ Limpar Conversa</button>
+    </div>
+
+    <!-- Lista de mensagens -->
+    <div id="historico"></div>
+
+    <form class="chat-footer" id="formChat">
+      <input type="text" id="campoTexto" placeholder="Digite uma pergunta..." autocomplete="off" required />
+      <button type="submit" id="btnEnviar">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    // ⚠️ ATENÇÃO: Se estiver testando local, deixe 'http://localhost:3000/api/chat'.
+    // Quando for subir para a Vercel, troque pela URL do seu Render:
+    // ex: 'https://sua-api-no-render.onrender.com/api/chat'
+    const API_URL = 'http://localhost:3000/api/chat';
+
+    const historico = document.getElementById('historico');
+    const formChat = document.getElementById('formChat');
+    const campoTexto = document.getElementById('campoTexto');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const btnLimpar = document.getElementById('btnLimpar');
+
+    function rolarFinal() {
+      historico.scrollTop = historico.scrollHeight;
+    }
+
+    // Função utilitária para adicionar balão na tela
+    function adicionarMensagem(texto, papel = 'bot') {
+      const div = document.createElement('div');
+      div.classList.add('mensagem', papel);
+
+      if (papel === 'bot') {
+        // Usa o marked para processar Markdown com segurança
+        try {
+          div.innerHTML = marked.parse(texto || '');
+        } catch (e) {
+          div.textContent = texto;
+        }
+      } else {
+        // Usuário é tratado como texto puro para evitar injeção de script
+        div.textContent = texto;
+      }
+
+      historico.appendChild(div);
+      rolarFinal();
+      return div;
+    }
+
+    // 1. Carregar histórico salvo no MongoDB
+    async function carregarHistorico() {
+      try {
+        const res = await fetch(`${API_URL}/historico`);
+        if (!res.ok) throw new Error('Falha ao buscar histórico');
+
+        const mensagens = await res.json();
+        historico.innerHTML = '';
+
+        if (Array.isArray(mensagens)) {
+          mensagens.forEach((msg) => {
+            adicionarMensagem(msg.conteudo, msg.role === 'user' ? 'usuario' : 'bot');
+          });
+        }
+      } catch (err) {
+        console.warn('Não foi possível carregar o histórico:', err.message);
+      }
+    }
+
+    // 2. Enviar nova mensagem
+    formChat.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const texto = campoTexto.value.trim();
+      if (!texto) return;
+
+      // Renderiza mensagem do usuário
+      adicionarMensagem(texto, 'usuario');
+      campoTexto.value = '';
+
+      // Mostra aviso de "Pensando..."
+      const balãoPensando = adicionarMensagem('Pensando...', 'bot');
+      btnEnviar.disabled = true;
+
+      try {
+        const res = await fetch(`${API_URL}/enviar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ texto }),
+        });
+
+        const dados = await res.json();
+
+        if (!res.ok) {
+          throw new Error(dados.erro || 'Erro na resposta do servidor.');
+        }
+
+        // Substitui o "Pensando..." pela resposta traduzida com Marked
+        balãoPensando.innerHTML = marked.parse(dados.resposta || 'Sem resposta.');
+      } catch (err) {
+        balãoPensando.style.color = '#ff6b6b';
+        balãoPensando.textContent = '❌ ' + (err.message || 'Erro ao conectar ao servidor.');
+      } finally {
+        btnEnviar.disabled = false;
+        campoTexto.focus();
+        rolarFinal();
+      }
+    });
+
+    // 3. Botão Reset (DELETE /limpar)
+    btnLimpar.addEventListener('click', async () => {
+      if (!confirm('Deseja realmente apagar todo o histórico de conversas?')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/limpar`, {
+          method: 'DELETE',
+        });
+
+        if (res.ok) {
+          historico.innerHTML = '';
+          alert('Histórico apagado com sucesso!');
+        } else {
+          alert('Erro ao apagar histórico no servidor.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Não foi possível conectar ao servidor para apagar o histórico.');
+      }
+    });
+
+    // Inicializa carregando as mensagens ao abrir
+    carregarHistorico();
+  </script>
+</body>
+</html>
