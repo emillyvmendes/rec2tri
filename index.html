@@ -3,31 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gemini AI Game & Chat</title>
+  <title>Gemini AI Game & Chat - Seguro</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #121214; color: #e1e1e6; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
-    .chat-card { width: 100%; max-width: 720px; height: 92vh; background-color: #202024; border: 1px solid #323238; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    
+    /* Tela de Autenticação */
+    .auth-card { width: 100%; max-width: 400px; background-color: #202024; border: 1px solid #323238; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 16px; }
+    .auth-card h2 { color: #04d361; text-align: center; }
+    .auth-card input { background-color: #121214; border: 1px solid #323238; border-radius: 6px; padding: 12px; color: #fff; font-size: 0.95rem; outline: none; }
+    .auth-card input:focus { border-color: #04d361; }
+    .auth-card button { background-color: #04d361; color: #000; padding: 12px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; }
+    .auth-card p { text-align: center; font-size: 0.85rem; color: #a8a8b3; cursor: pointer; }
+    .auth-card p span { color: #04d361; font-weight: 600; }
+
+    /* Tela do Chat */
+    .chat-card { width: 100%; max-width: 720px; height: 92vh; background-color: #202024; border: 1px solid #323238; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
     .chat-header { padding: 14px 20px; background-color: #18181b; border-bottom: 1px solid #323238; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .chat-header h1 { font-size: 1.1rem; color: #04d361; }
     .header-controls { display: flex; gap: 8px; align-items: center; }
-    input[type="text"] { background-color: #121214; border: 1px solid #323238; border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 0.9rem; outline: none; }
-    input:focus { border-color: #04d361; }
-    .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
-    .btn:hover { opacity: 0.85; }
+    .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .btn-reset { background-color: #e53e3e; color: #fff; }
     .btn-ranking { background-color: #8257e5; color: #fff; }
+    .btn-logout { background-color: #c53030; color: #fff; }
     #historico { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
     .mensagem { max-width: 82%; padding: 12px 16px; border-radius: 8px; line-height: 1.5; font-size: 0.95rem; word-wrap: break-word; }
     .usuario { background-color: #00875f; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
     .bot { background-color: #29292e; color: #e1e1e6; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #323238; }
     .chat-footer { padding: 16px; background-color: #18181b; border-top: 1px solid #323238; display: flex; gap: 10px; }
-    .chat-footer input { flex: 1; padding: 12px 16px; font-size: 0.95rem; }
-    .chat-footer button { background-color: #04d361; color: #000; padding: 0 20px; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; }
+    .chat-footer input { flex: 1; background-color: #121214; border: 1px solid #323238; border-radius: 6px; padding: 12px; color: #fff; outline: none; }
+    .chat-footer button { background-color: #04d361; color: #000; padding: 0 20px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; }
     
-    /* Modal de Ranking */
+    /* Modal Ranking */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
     .modal-content { background: #202024; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #323238; }
     .modal-content h2 { color: #04d361; margin-bottom: 16px; font-size: 1.2rem; }
@@ -37,48 +46,140 @@
 </head>
 <body>
 
-  <div class="chat-card">
+  <!-- TELA DE LOGIN / CADASTRO -->
+  <div class="auth-card" id="authContainer">
+    <h2 id="authTitle">🔑 Entrar no Guardião Tech</h2>
+    <input type="text" id="authNome" placeholder="Seu Nome (Apenas para cadastro)" style="display: none;" />
+    <input type="email" id="authEmail" placeholder="Seu e-mail..." required />
+    <input type="password" id="authSenha" placeholder="Sua senha..." required />
+    <button id="authBtnSubmit">Entrar</button>
+    <p id="authToggleText">Não tem uma conta? <span id="authToggleLink" style="color: #04d361; cursor: pointer;">Cadastre-se</span></p>
+  </div>
+
+  <!-- TELA DO CHAT -->
+  <div class="chat-card" id="chatContainer">
     <div class="chat-header">
-      <h1>🎮 Guardião Tech (Gemini Game)</h1>
+      <h1 id="userWelcome">🎮 Guardião Tech</h1>
       <div class="header-controls">
-        <input type="text" id="campoNickname" placeholder="Seu Nickname..." style="width: 130px;" />
         <button class="btn btn-ranking" id="btnRanking">🏆 Ranking</button>
         <button class="btn btn-reset" id="btnLimpar">🗑️ Limpar</button>
+        <button class="btn btn-logout" id="btnLogout">Sair</button>
       </div>
     </div>
 
     <div id="historico"></div>
 
     <form class="chat-footer" id="formChat">
-      <input type="text" id="campoTexto" placeholder="Responda à charada ou diga oi..." autocomplete="off" required />
+      <input type="text" id="campoTexto" placeholder="Digite sua resposta..." autocomplete="off" required />
       <button type="submit" id="btnEnviar">Enviar</button>
     </form>
   </div>
 
-  <!-- Modal do Hall da Fama -->
+  <!-- MODAL RANKING -->
   <div class="modal" id="modalRanking">
     <div class="modal-content">
       <h2>🏆 Hall da Fama (Top 10)</h2>
-      <ul class="ranking-list" id="listaRanking">
-        <!-- Preenchido via JS -->
-      </ul>
+      <ul class="ranking-list" id="listaRanking"></ul>
       <button class="btn btn-reset" id="fecharModal" style="width: 100%;">Fechar</button>
     </div>
   </div>
 
   <script>
-    const API_URL = 'http://localhost:3000/api/chat';
+    const API_URL = 'http://localhost:3000';
+    let isRegistering = false;
+
+    const authContainer = document.getElementById('authContainer');
+    const chatContainer = document.getElementById('chatContainer');
+    const authTitle = document.getElementById('authTitle');
+    const authNome = document.getElementById('authNome');
+    const authEmail = document.getElementById('authEmail');
+    const authSenha = document.getElementById('authSenha');
+    const authBtnSubmit = document.getElementById('authBtnSubmit');
+    const authToggleLink = document.getElementById('authToggleLink');
+    const authToggleText = document.getElementById('authToggleText');
 
     const historico = document.getElementById('historico');
     const formChat = document.getElementById('formChat');
     const campoTexto = document.getElementById('campoTexto');
-    const campoNickname = document.getElementById('campoNickname');
     const btnEnviar = document.getElementById('btnEnviar');
     const btnLimpar = document.getElementById('btnLimpar');
+    const btnLogout = document.getElementById('btnLogout');
     const btnRanking = document.getElementById('btnRanking');
     const modalRanking = document.getElementById('modalRanking');
     const fecharModal = document.getElementById('fecharModal');
     const listaRanking = document.getElementById('listaRanking');
+    const userWelcome = document.getElementById('userWelcome');
+
+    // Alternar entre tela de Login e Cadastro
+    authToggleLink.addEventListener('click', () => {
+      isRegistering = !isRegistering;
+      if (isRegistering) {
+        authTitle.textContent = '📝 Criar Nova Conta';
+        authNome.style.display = 'block';
+        authBtnSubmit.textContent = 'Cadastrar';
+        authToggleText.innerHTML = 'Já tem uma conta? <span id="authToggleLink" style="color: #04d361; cursor: pointer;">Entrar</span>';
+      } else {
+        authTitle.textContent = '🔑 Entrar no Guardião Tech';
+        authNome.style.display = 'none';
+        authBtnSubmit.textContent = 'Entrar';
+        authToggleText.innerHTML = 'Não tem uma conta? <span id="authToggleLink" style="color: #04d361; cursor: pointer;">Cadastre-se</span>';
+      }
+      document.getElementById('authToggleLink').addEventListener('click', arguments.callee);
+    });
+
+    // Enviar dados de Login ou Cadastro
+    authBtnSubmit.addEventListener('click', async () => {
+      const email = authEmail.value.trim();
+      const senha = authSenha.value.trim();
+      const nome = authNome.value.trim();
+
+      if (!email || !senha || (isRegistering && !nome)) {
+        alert('Preencha todos os campos!');
+        return;
+      }
+
+      const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
+
+      try {
+        const res = await fetch(`${API_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || 'Erro na autenticação');
+
+        if (isRegistering) {
+          alert('Cadastro realizado com sucesso! Faça o login.');
+          isRegistering = false;
+          authToggleLink.click();
+        } else {
+          // Salva o crachá (Token) no navegador
+          localStorage.setItem('token_saas', data.token);
+          localStorage.setItem('user_name', data.nome);
+          iniciarChat(data.nome);
+        }
+      } catch (err) {
+        alert('❌ ' + err.message);
+      }
+    });
+
+    function iniciarChat(nome) {
+      authContainer.style.display = 'none';
+      chatContainer.style.display = 'flex';
+      userWelcome.textContent = `🎮 Olá, ${nome}`;
+      carregarHistorico();
+    }
+
+    btnLogout.addEventListener('click', () => {
+      localStorage.removeItem('token_saas');
+      localStorage.removeItem('user_name');
+      chatContainer.style.display = 'none';
+      authContainer.style.display = 'flex';
+      authEmail.value = '';
+      authSenha.value = '';
+    });
 
     function rolarFinal() {
       historico.scrollTop = historico.scrollHeight;
@@ -98,48 +199,49 @@
     }
 
     async function carregarHistorico() {
+      const token = localStorage.getItem('token_saas');
       try {
-        const res = await fetch(`${API_URL}/historico`);
+        const res = await fetch(`${API_URL}/api/chat/historico`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (!res.ok) throw new Error();
         const mensagens = await res.json();
         historico.innerHTML = '';
         mensagens.forEach((msg) => {
-          // Ajusta a exibição das mensagens armazenadas
           const roleFinal = msg.role === 'user' ? 'usuario' : 'bot';
           adicionarMensagem(msg.conteudo, roleFinal);
         });
       } catch (err) {
-        console.warn('Histórico vazio ou indisponível.');
+        console.warn('Histórico vazio ou não autorizado.');
       }
     }
 
     formChat.addEventListener('submit', async (e) => {
       e.preventDefault();
       const texto = campoTexto.value.trim();
-      const nickname = campoNickname.value.trim() || 'ViajanteAnônimo';
+      const token = localStorage.getItem('token_saas');
+      const nickname = localStorage.getItem('user_name') || 'Jogador';
       if (!texto) return;
 
       adicionarMensagem(`${nickname}: ${texto}`, 'usuario');
       campoTexto.value = '';
-
-      const balaoPensando = adicionarMensagem('O Guardião está pensando...', 'bot');
       btnEnviar.disabled = true;
 
       try {
-        const res = await fetch(`${API_URL}/enviar`, {
+        const res = await fetch(`${API_URL}/api/chat/enviar`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Envia o crachá
+          },
           body: JSON.stringify({ texto, nickname }),
         });
 
         const dados = await res.json();
-        if (!res.ok) throw new Error(dados.erro || 'Erro no servidor.');
+        if (!res.ok) throw new Error(dados.erro || 'Erro ao enviar mensagem.');
 
-        // Remove a mensagem de pensando e exibe a resposta real
-        historico.lastChild.remove();
         adicionarMensagem(dados.resposta, 'bot');
       } catch (err) {
-        historico.lastChild.remove();
         adicionarMensagem('❌ ' + err.message, 'bot');
       } finally {
         btnEnviar.disabled = false;
@@ -149,16 +251,22 @@
 
     btnLimpar.addEventListener('click', async () => {
       if (!confirm('Deseja apagar o histórico?')) return;
-      const res = await fetch(`${API_URL}/limpar`, { method: 'DELETE' });
+      const token = localStorage.getItem('token_saas');
+      const res = await fetch(`${API_URL}/api/chat/limpar`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) historico.innerHTML = '';
     });
 
-    // Lógica do Modal de Ranking
     btnRanking.addEventListener('click', async () => {
       modalRanking.style.display = 'flex';
       listaRanking.innerHTML = '<li class="ranking-item">Carregando...</li>';
+      const token = localStorage.getItem('token_saas');
       try {
-        const res = await fetch(`${API_URL}/ranking`);
+        const res = await fetch(`${API_URL}/api/chat/ranking`, {
+          headers: { 'Authorization': `Bearer ${token}` } // Envia o crachá
+        });
         const jogadores = await res.json();
         listaRanking.innerHTML = '';
 
@@ -187,7 +295,14 @@
       modalRanking.style.display = 'none';
     });
 
-    carregarHistorico();
+    // Auto-login se o token já estiver armazenado
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token_saas');
+      const nome = localStorage.getItem('user_name');
+      if (token && nome) {
+        iniciarChat(nome);
+      }
+    });
   </script>
 </body>
 </html>

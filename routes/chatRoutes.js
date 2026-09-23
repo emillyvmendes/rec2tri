@@ -1,15 +1,12 @@
 const express = require('express');
-const router = express.Router();const chatRoutes = require('./routes/chatRoutes');
-// POST /api/chat/enviar -> Envia prompt para a IA
-router.post('/enviar', chatController.enviarMensagem);
+const router = express.Router();
+const chatController = require('../controllers/chatController');
+const autenticarToken = require('../middlewares/authMiddleware'); // <--- ADICIONADO
 
-// GET /api/chat/historico -> Retorna o histórico de mensagens
-router.get('/historico', chatController.listarHistorico);
-
-// DELETE /api/chat/limpar -> Limpa todas as mensagens
-router.delete('/limpar', chatController.limparHistorico);
-
-// GET /api/chat/ranking -> Retorna o Top 10 jogadores
-router.get('/ranking', chatController.obterRanking);
+// Rotas protegidas pelo token JWT
+router.post('/enviar', autenticarToken, chatController.enviarMensagem);
+router.get('/historico', autenticarToken, chatController.listarHistorico);
+router.delete('/limpar', autenticarToken, chatController.limparHistorico);
+router.get('/ranking', autenticarToken, chatController.obterRanking);
 
 module.exports = router;
