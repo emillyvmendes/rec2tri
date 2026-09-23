@@ -14,7 +14,7 @@ Evolução do Projeto Integrador através da integração com o modelo de inteli
 * **Banco de Dados:** MongoDB Atlas (NoSQL).
 * **Back-end:** Node.js com Express hospedado no Render.
 * **Front-end:** Interface web estática com Marked.js.
-* **IA:** Google Generative AI (`gemini-1.5-flash`).
+* **IA:** Google Generative AI (`gemini-3.5-flash-lite`).
 
 ---
 
@@ -26,7 +26,7 @@ const enviarMensagem = async (req, res) => {
     const { texto } = req.body;
     const mensagemUsuario = await Mensagem.create({ role: 'user', conteudo: texto });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: gemini-3.5-flash-lite });
     const resultado = await model.generateContent(texto);
     const respostaIA = resultado.response.text();
 
