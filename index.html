@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gemini AI Chat</title>
 
-  <!-- Biblioteca Marked.js para interpretar Markdown (negrito, listas, blocos de código) -->
+  <!-- Biblioteca Marked.js para interpretar Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
@@ -39,7 +39,6 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    /* Topo com botão de limpar */
     .chat-header {
       padding: 16px 20px;
       background-color: #18181b;
@@ -71,7 +70,6 @@
       background-color: #c53030;
     }
 
-    /* Área onde as mensagens aparecem */
     #historico {
       flex: 1;
       padding: 20px;
@@ -90,7 +88,6 @@
       word-wrap: break-word;
     }
 
-    /* Estilo da mensagem do Usuário */
     .usuario {
       background-color: #00875f;
       color: #ffffff;
@@ -99,7 +96,6 @@
       white-space: pre-wrap;
     }
 
-    /* Estilo da mensagem da IA (Bot) */
     .bot {
       background-color: #29292e;
       color: #e1e1e6;
@@ -108,15 +104,8 @@
       border: 1px solid #323238;
     }
 
-    /* Formatações de Markdown no Bot */
-    .bot p {
-      margin-bottom: 8px;
-    }
-
-    .bot p:last-child {
-      margin-bottom: 0;
-    }
-
+    .bot p { margin-bottom: 8px; }
+    .bot p:last-child { margin-bottom: 0; }
     .bot pre {
       background-color: #121214;
       padding: 10px;
@@ -125,7 +114,6 @@
       margin: 10px 0;
       border: 1px solid #323238;
     }
-
     .bot code {
       font-family: 'Courier New', Courier, monospace;
       background-color: #121214;
@@ -133,13 +121,8 @@
       border-radius: 4px;
       font-size: 0.9em;
     }
+    .bot ul, .bot ol { margin-left: 20px; margin-bottom: 8px; }
 
-    .bot ul, .bot ol {
-      margin-left: 20px;
-      margin-bottom: 8px;
-    }
-
-    /* Barra inferior de input */
     .chat-footer {
       padding: 16px;
       background-color: #18181b;
@@ -159,9 +142,7 @@
       outline: none;
     }
 
-    .chat-footer input:focus {
-      border-color: #04d361;
-    }
+    .chat-footer input:focus { border-color: #04d361; }
 
     .chat-footer button {
       background-color: #04d361;
@@ -175,14 +156,8 @@
       transition: opacity 0.2s ease;
     }
 
-    .chat-footer button:hover {
-      opacity: 0.85;
-    }
-
-    .chat-footer button:disabled {
-      background-color: #7c7c8a;
-      cursor: not-allowed;
-    }
+    .chat-footer button:hover { opacity: 0.85; }
+    .chat-footer button:disabled { background-color: #7c7c8a; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -190,11 +165,9 @@
   <div class="chat-card">
     <div class="chat-header">
       <h1>Gemini IA Chat</h1>
-      <!-- Botão Reset da Fase 2 e 3 -->
       <button class="btn-reset" id="btnLimpar">🗑️ Limpar Conversa</button>
     </div>
 
-    <!-- Lista de mensagens -->
     <div id="historico"></div>
 
     <form class="chat-footer" id="formChat">
@@ -204,9 +177,8 @@
   </div>
 
   <script>
-    // ⚠️ ATENÇÃO: Se estiver testando local, deixe 'http://localhost:3000/api/chat'.
-    // Quando for subir para a Vercel, troque pela URL do seu Render:
-    // ex: 'https://sua-api-no-render.onrender.com/api/chat'
+    // Se estiver testando localmente, deixe 'http://localhost:3000/api/chat'.
+    // Na nuvem (Render), troque pela URL pública do seu serviço.
     const API_URL = 'http://localhost:3000/api/chat';
 
     const historico = document.getElementById('historico');
@@ -219,20 +191,17 @@
       historico.scrollTop = historico.scrollHeight;
     }
 
-    // Função utilitária para adicionar balão na tela
     function adicionarMensagem(texto, papel = 'bot') {
       const div = document.createElement('div');
       div.classList.add('mensagem', papel);
 
       if (papel === 'bot') {
-        // Usa o marked para processar Markdown com segurança
         try {
           div.innerHTML = marked.parse(texto || '');
         } catch (e) {
           div.textContent = texto;
         }
       } else {
-        // Usuário é tratado como texto puro para evitar injeção de script
         div.textContent = texto;
       }
 
@@ -241,7 +210,6 @@
       return div;
     }
 
-    // 1. Carregar histórico salvo no MongoDB
     async function carregarHistorico() {
       try {
         const res = await fetch(`${API_URL}/historico`);
@@ -260,18 +228,15 @@
       }
     }
 
-    // 2. Enviar nova mensagem
     formChat.addEventListener('submit', async (e) => {
       e.preventDefault();
       const texto = campoTexto.value.trim();
       if (!texto) return;
 
-      // Renderiza mensagem do usuário
       adicionarMensagem(texto, 'usuario');
       campoTexto.value = '';
 
-      // Mostra aviso de "Pensando..."
-      const balãoPensando = adicionarMensagem('Pensando...', 'bot');
+      const balaoPensando = adicionarMensagem('Pensando...', 'bot');
       btnEnviar.disabled = true;
 
       try {
@@ -287,11 +252,10 @@
           throw new Error(dados.erro || 'Erro na resposta do servidor.');
         }
 
-        // Substitui o "Pensando..." pela resposta traduzida com Marked
-        balãoPensando.innerHTML = marked.parse(dados.resposta || 'Sem resposta.');
+        balaoPensando.innerHTML = marked.parse(dados.resposta || 'Sem resposta.');
       } catch (err) {
-        balãoPensando.style.color = '#ff6b6b';
-        balãoPensando.textContent = '❌ ' + (err.message || 'Erro ao conectar ao servidor.');
+        balaoPensando.style.color = '#ff6b6b';
+        balaoPensando.textContent = '❌ ' + (err.message || 'Erro ao conectar ao servidor.');
       } finally {
         btnEnviar.disabled = false;
         campoTexto.focus();
@@ -299,7 +263,6 @@
       }
     });
 
-    // 3. Botão Reset (DELETE /limpar)
     btnLimpar.addEventListener('click', async () => {
       if (!confirm('Deseja realmente apagar todo o histórico de conversas?')) {
         return;
@@ -322,7 +285,6 @@
       }
     });
 
-    // Inicializa carregando as mensagens ao abrir
     carregarHistorico();
   </script>
 </body>

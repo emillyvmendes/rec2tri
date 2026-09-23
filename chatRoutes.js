@@ -8,7 +8,7 @@ router.post('/enviar', chatController.enviarMensagem);
 // GET /api/chat/historico -> Retorna o histórico de mensagens
 router.get('/historico', chatController.listarHistorico);
 
-// DELETE /api/chat/limpar -> Limpa todas as mensagens (Fase 2)
+// DELETE /api/chat/limpar -> Limpa todas as mensagens
 router.delete('/limpar', chatController.limparHistorico);
 
 module.exports = router;

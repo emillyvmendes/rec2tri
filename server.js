@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Conexão com o MongoDB
+// Conexão com o MongoDB (suporta MongoDB Atlas ou local)
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/chat-gemini';
 
 mongoose

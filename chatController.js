@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Mensagem = require('../models/Mensagem');
 
-// Inicializa a instância do Google Gemini
+// Inicializa a instância do Google Gemini com a chave do .env
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Envia mensagem para a IA e salva no MongoDB
@@ -20,7 +20,8 @@ const enviarMensagem = async (req, res) => {
     });
 
     // 2. Envia para o Gemini
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // DEPOIS (correto):
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash-lite'});
     const resultado = await model.generateContent(texto);
     const respostaIA = resultado.response.text();
 
@@ -53,8 +54,7 @@ const listarHistorico = async (req, res) => {
   }
 };
 
-// ================= FASE 2: BOTÃO RESET =================
-// Apaga todas as mensagens do banco de dados
+// Apaga todas as mensagens do banco de dados (Botão Limpar)
 const limparHistorico = async (req, res) => {
   try {
     await Mensagem.deleteMany({});
@@ -68,5 +68,5 @@ const limparHistorico = async (req, res) => {
 module.exports = {
   enviarMensagem,
   listarHistorico,
-  limparHistorico, // Não esqueça de exportar aqui!
+  limparHistorico,
 };
