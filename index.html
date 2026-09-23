@@ -3,189 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gemini AI Chat</title>
-
-  <!-- Biblioteca Marked.js para interpretar Markdown -->
+  <title>Gemini AI Game & Chat</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: #121214;
-      color: #e1e1e6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 16px;
-    }
-
-    .chat-card {
-      width: 100%;
-      max-width: 720px;
-      height: 90vh;
-      background-color: #202024;
-      border: 1px solid #323238;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .chat-header {
-      padding: 16px 20px;
-      background-color: #18181b;
-      border-bottom: 1px solid #323238;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .chat-header h1 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #04d361;
-    }
-
-    .btn-reset {
-      background-color: #e53e3e;
-      color: #ffffff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: background 0.2s ease;
-    }
-
-    .btn-reset:hover {
-      background-color: #c53030;
-    }
-
-    #historico {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .mensagem {
-      max-width: 82%;
-      padding: 12px 16px;
-      border-radius: 8px;
-      line-height: 1.5;
-      font-size: 0.95rem;
-      word-wrap: break-word;
-    }
-
-    .usuario {
-      background-color: #00875f;
-      color: #ffffff;
-      align-self: flex-end;
-      border-bottom-right-radius: 2px;
-      white-space: pre-wrap;
-    }
-
-    .bot {
-      background-color: #29292e;
-      color: #e1e1e6;
-      align-self: flex-start;
-      border-bottom-left-radius: 2px;
-      border: 1px solid #323238;
-    }
-
-    .bot p { margin-bottom: 8px; }
-    .bot p:last-child { margin-bottom: 0; }
-    .bot pre {
-      background-color: #121214;
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 10px 0;
-      border: 1px solid #323238;
-    }
-    .bot code {
-      font-family: 'Courier New', Courier, monospace;
-      background-color: #121214;
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
-    .bot ul, .bot ol { margin-left: 20px; margin-bottom: 8px; }
-
-    .chat-footer {
-      padding: 16px;
-      background-color: #18181b;
-      border-top: 1px solid #323238;
-      display: flex;
-      gap: 10px;
-    }
-
-    .chat-footer input {
-      flex: 1;
-      background-color: #121214;
-      border: 1px solid #323238;
-      border-radius: 6px;
-      padding: 12px 16px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .chat-footer input:focus { border-color: #04d361; }
-
-    .chat-footer button {
-      background-color: #04d361;
-      color: #000;
-      border: none;
-      padding: 0 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.95rem;
-      transition: opacity 0.2s ease;
-    }
-
-    .chat-footer button:hover { opacity: 0.85; }
-    .chat-footer button:disabled { background-color: #7c7c8a; cursor: not-allowed; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #121214; color: #e1e1e6; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+    .chat-card { width: 100%; max-width: 720px; height: 92vh; background-color: #202024; border: 1px solid #323238; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .chat-header { padding: 14px 20px; background-color: #18181b; border-bottom: 1px solid #323238; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .chat-header h1 { font-size: 1.1rem; color: #04d361; }
+    .header-controls { display: flex; gap: 8px; align-items: center; }
+    input[type="text"] { background-color: #121214; border: 1px solid #323238; border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 0.9rem; outline: none; }
+    input:focus { border-color: #04d361; }
+    .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-reset { background-color: #e53e3e; color: #fff; }
+    .btn-ranking { background-color: #8257e5; color: #fff; }
+    #historico { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .mensagem { max-width: 82%; padding: 12px 16px; border-radius: 8px; line-height: 1.5; font-size: 0.95rem; word-wrap: break-word; }
+    .usuario { background-color: #00875f; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .bot { background-color: #29292e; color: #e1e1e6; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #323238; }
+    .chat-footer { padding: 16px; background-color: #18181b; border-top: 1px solid #323238; display: flex; gap: 10px; }
+    .chat-footer input { flex: 1; padding: 12px 16px; font-size: 0.95rem; }
+    .chat-footer button { background-color: #04d361; color: #000; padding: 0 20px; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; }
+    
+    /* Modal de Ranking */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+    .modal-content { background: #202024; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #323238; }
+    .modal-content h2 { color: #04d361; margin-bottom: 16px; font-size: 1.2rem; }
+    .ranking-list { list-style: none; margin-bottom: 16px; max-height: 250px; overflow-y: auto; }
+    .ranking-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #323238; font-size: 0.95rem; }
   </style>
 </head>
 <body>
 
   <div class="chat-card">
     <div class="chat-header">
-      <h1>Gemini IA Chat</h1>
-      <button class="btn-reset" id="btnLimpar">🗑️ Limpar Conversa</button>
+      <h1>🎮 Guardião Tech (Gemini Game)</h1>
+      <div class="header-controls">
+        <input type="text" id="campoNickname" placeholder="Seu Nickname..." style="width: 130px;" />
+        <button class="btn btn-ranking" id="btnRanking">🏆 Ranking</button>
+        <button class="btn btn-reset" id="btnLimpar">🗑️ Limpar</button>
+      </div>
     </div>
 
     <div id="historico"></div>
 
     <form class="chat-footer" id="formChat">
-      <input type="text" id="campoTexto" placeholder="Digite uma pergunta..." autocomplete="off" required />
+      <input type="text" id="campoTexto" placeholder="Responda à charada ou diga oi..." autocomplete="off" required />
       <button type="submit" id="btnEnviar">Enviar</button>
     </form>
   </div>
 
+  <!-- Modal do Hall da Fama -->
+  <div class="modal" id="modalRanking">
+    <div class="modal-content">
+      <h2>🏆 Hall da Fama (Top 10)</h2>
+      <ul class="ranking-list" id="listaRanking">
+        <!-- Preenchido via JS -->
+      </ul>
+      <button class="btn btn-reset" id="fecharModal" style="width: 100%;">Fechar</button>
+    </div>
+  </div>
+
   <script>
-    // Se estiver testando localmente, deixe 'http://localhost:3000/api/chat'.
-    // Na nuvem (Render), troque pela URL pública do seu serviço.
     const API_URL = 'http://localhost:3000/api/chat';
 
     const historico = document.getElementById('historico');
     const formChat = document.getElementById('formChat');
     const campoTexto = document.getElementById('campoTexto');
+    const campoNickname = document.getElementById('campoNickname');
     const btnEnviar = document.getElementById('btnEnviar');
     const btnLimpar = document.getElementById('btnLimpar');
+    const btnRanking = document.getElementById('btnRanking');
+    const modalRanking = document.getElementById('modalRanking');
+    const fecharModal = document.getElementById('fecharModal');
+    const listaRanking = document.getElementById('listaRanking');
 
     function rolarFinal() {
       historico.scrollTop = historico.scrollHeight;
@@ -194,95 +87,104 @@
     function adicionarMensagem(texto, papel = 'bot') {
       const div = document.createElement('div');
       div.classList.add('mensagem', papel);
-
       if (papel === 'bot') {
-        try {
-          div.innerHTML = marked.parse(texto || '');
-        } catch (e) {
-          div.textContent = texto;
-        }
+        try { div.innerHTML = marked.parse(texto || ''); } 
+        catch (e) { div.textContent = texto; }
       } else {
         div.textContent = texto;
       }
-
       historico.appendChild(div);
       rolarFinal();
-      return div;
     }
 
     async function carregarHistorico() {
       try {
         const res = await fetch(`${API_URL}/historico`);
-        if (!res.ok) throw new Error('Falha ao buscar histórico');
-
+        if (!res.ok) throw new Error();
         const mensagens = await res.json();
         historico.innerHTML = '';
-
-        if (Array.isArray(mensagens)) {
-          mensagens.forEach((msg) => {
-            adicionarMensagem(msg.conteudo, msg.role === 'user' ? 'usuario' : 'bot');
-          });
-        }
+        mensagens.forEach((msg) => {
+          // Ajusta a exibição das mensagens armazenadas
+          const roleFinal = msg.role === 'user' ? 'usuario' : 'bot';
+          adicionarMensagem(msg.conteudo, roleFinal);
+        });
       } catch (err) {
-        console.warn('Não foi possível carregar o histórico:', err.message);
+        console.warn('Histórico vazio ou indisponível.');
       }
     }
 
     formChat.addEventListener('submit', async (e) => {
       e.preventDefault();
       const texto = campoTexto.value.trim();
+      const nickname = campoNickname.value.trim() || 'ViajanteAnônimo';
       if (!texto) return;
 
-      adicionarMensagem(texto, 'usuario');
+      adicionarMensagem(`${nickname}: ${texto}`, 'usuario');
       campoTexto.value = '';
 
-      const balaoPensando = adicionarMensagem('Pensando...', 'bot');
+      const balaoPensando = adicionarMensagem('O Guardião está pensando...', 'bot');
       btnEnviar.disabled = true;
 
       try {
         const res = await fetch(`${API_URL}/enviar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texto }),
+          body: JSON.stringify({ texto, nickname }),
         });
 
         const dados = await res.json();
+        if (!res.ok) throw new Error(dados.erro || 'Erro no servidor.');
 
-        if (!res.ok) {
-          throw new Error(dados.erro || 'Erro na resposta do servidor.');
-        }
-
-        balaoPensando.innerHTML = marked.parse(dados.resposta || 'Sem resposta.');
+        // Remove a mensagem de pensando e exibe a resposta real
+        historico.lastChild.remove();
+        adicionarMensagem(dados.resposta, 'bot');
       } catch (err) {
-        balaoPensando.style.color = '#ff6b6b';
-        balaoPensando.textContent = '❌ ' + (err.message || 'Erro ao conectar ao servidor.');
+        historico.lastChild.remove();
+        adicionarMensagem('❌ ' + err.message, 'bot');
       } finally {
         btnEnviar.disabled = false;
         campoTexto.focus();
-        rolarFinal();
       }
     });
 
     btnLimpar.addEventListener('click', async () => {
-      if (!confirm('Deseja realmente apagar todo o histórico de conversas?')) {
-        return;
-      }
+      if (!confirm('Deseja apagar o histórico?')) return;
+      const res = await fetch(`${API_URL}/limpar`, { method: 'DELETE' });
+      if (res.ok) historico.innerHTML = '';
+    });
 
+    // Lógica do Modal de Ranking
+    btnRanking.addEventListener('click', async () => {
+      modalRanking.style.display = 'flex';
+      listaRanking.innerHTML = '<li class="ranking-item">Carregando...</li>';
       try {
-        const res = await fetch(`${API_URL}/limpar`, {
-          method: 'DELETE',
-        });
+        const res = await fetch(`${API_URL}/ranking`);
+        const jogadores = await res.json();
+        listaRanking.innerHTML = '';
 
-        if (res.ok) {
-          historico.innerHTML = '';
-          alert('Histórico apagado com sucesso!');
-        } else {
-          alert('Erro ao apagar histórico no servidor.');
+        if (jogadores.length === 0) {
+          listaRanking.innerHTML = '<li class="ranking-item">Nenhum jogador pontuou ainda.</li>';
+          return;
         }
+
+        jogadores.forEach((jog, index) => {
+          const li = document.createElement('li');
+          li.classList.add('ranking-item');
+          let medalha = `${index + 1}º`;
+          if (index === 0) medalha = '🥇 1º';
+          if (index === 1) medalha = '🥈 2º';
+          if (index === 2) medalha = '🥉 3º';
+
+          li.innerHTML = `<span>${medalha} - ${jog.nome}</span> <strong>${jog.xp} XP</strong>`;
+          listaRanking.appendChild(li);
+        });
       } catch (err) {
-        console.error(err);
-        alert('Não foi possível conectar ao servidor para apagar o histórico.');
+        listaRanking.innerHTML = '<li class="ranking-item">Erro ao carregar ranking.</li>';
       }
+    });
+
+    fecharModal.addEventListener('click', () => {
+      modalRanking.style.display = 'none';
     });
 
     carregarHistorico();
