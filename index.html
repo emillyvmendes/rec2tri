@@ -1,3 +1,5 @@
+--- START OF FILE index.html ---
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -22,7 +24,14 @@
     /* Tela do Chat */
     .chat-card { width: 100%; max-width: 720px; height: 92vh; background-color: #202024; border: 1px solid #323238; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
     .chat-header { padding: 14px 20px; background-color: #18181b; border-bottom: 1px solid #323238; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .header-left { display: flex; align-items: center; gap: 10px; }
     .chat-header h1 { font-size: 1.1rem; color: #04d361; }
+    
+    /* Indicador de Status (Health Check) */
+    .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; background: #121214; padding: 4px 8px; border-radius: 12px; border: 1px solid #323238; color: #a8a8b3; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #e53e3e; display: inline-block; }
+    .status-dot.online { background-color: #04d361; box-shadow: 0 0 6px #04d361; }
+
     .header-controls { display: flex; gap: 8px; align-items: center; }
     .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .btn-reset { background-color: #e53e3e; color: #fff; }
@@ -59,7 +68,13 @@
   <!-- TELA DO CHAT -->
   <div class="chat-card" id="chatContainer">
     <div class="chat-header">
-      <h1 id="userWelcome">🎮 Guardião Tech</h1>
+      <div class="header-left">
+        <h1 id="userWelcome">🎮 Guardião Tech</h1>
+        <div class="status-indicator" id="statusIndicator" title="Verificando API...">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Checando...</span>
+        </div>
+      </div>
       <div class="header-controls">
         <button class="btn btn-ranking" id="btnRanking">🏆 Ranking</button>
         <button class="btn btn-reset" id="btnLimpar">🗑️ Limpar</button>
@@ -109,6 +124,29 @@
     const fecharModal = document.getElementById('fecharModal');
     const listaRanking = document.getElementById('listaRanking');
     const userWelcome = document.getElementById('userWelcome');
+    
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    // Função de Health Check no carregamento
+    async function verificarSaudeAPI() {
+      try {
+        const res = await fetch(`${API_URL}/api/health`);
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          statusDot.classList.add('online');
+          statusText.textContent = 'Sistema Online';
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
+        statusDot.classList.remove('online');
+        statusText.textContent = 'Offline';
+      }
+    }
+
+    // Executa a verificação ao abrir a página
+    verificarSaudeAPI();
 
     // Alternar entre tela de Login e Cadastro
     authToggleLink.addEventListener('click', () => {
@@ -155,7 +193,6 @@
           isRegistering = false;
           authToggleLink.click();
         } else {
-          // Salva o crachá (Token) no navegador
           localStorage.setItem('token_saas', data.token);
           localStorage.setItem('user_name', data.nome);
           iniciarChat(data.nome);
@@ -228,15 +265,15 @@
       btnEnviar.disabled = true;
 
       try {
-        const res = await fetch(`${API_URL}/api/chat/enviar`, {
+const res = await fetch(`${API_URL}/api/chat/enviar`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Envia o crachá
+            'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ texto, nickname }),
+          body: JSON.stringify({ texto, nickname }), // <--- O nickname vai aqui
         });
-
+        
         const dados = await res.json();
         if (!res.ok) throw new Error(dados.erro || 'Erro ao enviar mensagem.');
 
@@ -265,7 +302,7 @@
       const token = localStorage.getItem('token_saas');
       try {
         const res = await fetch(`${API_URL}/api/chat/ranking`, {
-          headers: { 'Authorization': `Bearer ${token}` } // Envia o crachá
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         const jogadores = await res.json();
         listaRanking.innerHTML = '';
@@ -295,7 +332,6 @@
       modalRanking.style.display = 'none';
     });
 
-    // Auto-login se o token já estiver armazenado
     window.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('token_saas');
       const nome = localStorage.getItem('user_name');
